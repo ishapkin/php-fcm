@@ -53,13 +53,18 @@ class Notification implements Request
      * @var string
      */
     private $click_action;
+
+    /**
+     * @var string
+     */
+    private $imageUrl;
     
     /**
      * @param string $title
      * @param string $body
      * @param string $recipient
      */
-    public function __construct(string $title = '', string $body = '', string $recipient = '', string $sound = '', string $icon = '', string $color = '', int $badge = 0, string $tag = '', string $subtitle = '', array $data = [], string $click_action = '')
+    public function __construct(string $title = '', string $body = '', string $recipient = '', string $sound = '', string $icon = '', string $color = '', int $badge = 0, string $tag = '', string $subtitle = '', array $data = [], string $click_action = '', string $imageUrl = null)
     {
         $this->title = $title;
         $this->body = $body;
@@ -69,6 +74,7 @@ class Notification implements Request
         $this->badge = $badge;
         $this->tag = $tag;
         $this->subtitle = $subtitle;
+        $this->imageUrl = $imageUrl;
 
         if (!empty($click_action)) {
             $this->click_action = $click_action;
@@ -191,6 +197,18 @@ class Notification implements Request
     }
 
     /**
+     * @param string $imageUrl
+     *
+     * @return $this
+     */
+    public function setImageUrl(string $imageUrl): self
+    {
+        $this->imageUrl = $imageUrl;
+
+        return $this;
+    }
+
+    /**
      * @inheritdoc
      */
     public function getBody(): array
@@ -242,6 +260,28 @@ class Notification implements Request
 
         if (!empty($this->click_action)) {
             $request['notification']['click_action'] = $this->click_action;
+        }
+
+        if (!empty($this->imageUrl)) {
+            // Send image for APNS
+            $request['apns'] = [
+                'payload' => [
+                    'aps' => [
+                        'mutable-content' => 1
+                    ]
+                ],
+                'fcm_options' => [
+                    'image' => $this->imageUrl
+                ]
+            ];
+            // Send image for Android
+            $request['android'] = [
+                'notification' => [
+                    'image' => $this->imageUrl,
+                    'title' => $this->title,
+                    'body' => $this->body
+                ]
+            ];
         }
         
         if (!empty($this->data)) {
