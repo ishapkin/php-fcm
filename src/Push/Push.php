@@ -92,6 +92,6 @@ trait Push
      */
     public function getUrl(): string
     {
-        return 'https://fcm.googleapis.com/fcm/send';
+        return 'https://fcm.googleapis.com/v1/projects/myproject-b5ae1/messages:send';
     }
 }
